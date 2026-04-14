@@ -1,0 +1,30 @@
+We have a row for each customer and the features' categories are described below:
+
+Demographic customer information
+
+gender
+SeniorCitizen
+Partner
+Dependents
+Services that each customer has signed up for
+
+PhoneService
+MultipleLines
+InternetService
+OnlineSecurity
+OnlineBackup
+DeviceProtection
+TechSupport
+StreamingTV
+StreamingMovies
+Customer account information
+
+tenure
+Contract
+PaperlessBilling
+PaymentMethod
+MonthlyCharges
+TotalCharges
+Customers who left within the last month (This is the feature our model is going to predict)
+
+Churn
