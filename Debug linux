@@ -7,3 +7,6 @@ sudo resolvectl dns eth0 8.8.8.8 1.1.1.1
 sudo resolvectl dns wlp6s0 8.8.8.8 1.1.1.1
 resolvectl status
 pip install pandas numpy scikit-learn xgboost seaborn matplotlit
+source /home/basha/Documents/ML1/.venv/bin/activate
+streamlit run ../streamlit_app.py
+model = joblib.load('../final_churn_model.pkl')
