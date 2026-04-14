@@ -1,0 +1,104 @@
+import streamlit as st
+import pandas as pd
+import joblib
+
+# Load model
+model = joblib.load('final_churn_model.pkl')
+
+# Page config
+st.set_page_config(page_title="Churn Prediction", layout="wide")
+
+# Title
+st.title("📊 Customer Churn Prediction Dashboard")
+st.markdown("### Predict whether a customer will churn using Machine Learning")
+
+# --- Layout ---
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.subheader("👤 Customer Info")
+    gender = st.selectbox("Gender", ["Male", "Female"])
+    SeniorCitizen = st.selectbox("Senior Citizen", [0,1])
+    Partner = st.selectbox("Partner", ["Yes","No"])
+    Dependents = st.selectbox("Dependents", ["Yes","No"])
+
+with col2:
+    st.subheader("📞 Services")
+    PhoneService = st.selectbox("Phone Service", ["Yes","No"])
+    MultipleLines = st.selectbox("Multiple Lines", ["Yes","No","No phone service"])
+    InternetService = st.selectbox("Internet Service", ["DSL","Fiber optic","No"])
+    OnlineSecurity = st.selectbox("Online Security", ["Yes","No","No internet service"])
+    TechSupport = st.selectbox("Tech Support", ["Yes","No","No internet service"])
+
+with col3:
+    st.subheader("💳 Billing")
+    Contract = st.selectbox("Contract", ["Month-to-month","One year","Two year"])
+    PaperlessBilling = st.selectbox("Paperless Billing", ["Yes","No"])
+    PaymentMethod = st.selectbox("Payment Method", [
+        "Electronic check","Mailed check","Bank transfer (automatic)","Credit card (automatic)"
+    ])
+
+# --- Additional Features ---
+st.subheader("📈 Usage Details")
+col4, col5 = st.columns(2)
+
+with col4:
+    tenure = st.slider("Tenure (months)", 0, 72, 12)
+    MonthlyCharges = st.slider("Monthly Charges ($)", 0, 150, 70)
+
+with col5:
+    TotalCharges = st.slider("Total Charges ($)", 0, 10000, 2000)
+    OnlineBackup = st.selectbox("Online Backup", ["Yes","No","No internet service"])
+    DeviceProtection = st.selectbox("Device Protection", ["Yes","No","No internet service"])
+    StreamingTV = st.selectbox("Streaming TV", ["Yes","No","No internet service"])
+    StreamingMovies = st.selectbox("Streaming Movies", ["Yes","No","No internet service"])
+
+# --- Input DataFrame ---
+input_df = pd.DataFrame({
+    'gender':[gender],
+    'SeniorCitizen':[SeniorCitizen],
+    'Partner':[Partner],
+    'Dependents':[Dependents],
+    'tenure':[tenure],
+    'PhoneService':[PhoneService],
+    'MultipleLines':[MultipleLines],
+    'InternetService':[InternetService],
+    'OnlineSecurity':[OnlineSecurity],
+    'OnlineBackup':[OnlineBackup],
+    'DeviceProtection':[DeviceProtection],
+    'TechSupport':[TechSupport],
+    'StreamingTV':[StreamingTV],
+    'StreamingMovies':[StreamingMovies],
+    'Contract':[Contract],
+    'PaperlessBilling':[PaperlessBilling],
+    'PaymentMethod':[PaymentMethod],
+    'MonthlyCharges':[MonthlyCharges],
+    'TotalCharges':[TotalCharges]
+})
+
+# --- Prediction Button ---
+st.markdown("---")
+if st.button("🚀 Predict Churn", use_container_width=True):
+
+    prediction = model.predict(input_df)[0]
+    prob = model.predict_proba(input_df)[0][1]
+
+    st.subheader("🔍 Prediction Result")
+
+    col6, col7 = st.columns(2)
+
+    with col6:
+        if prediction == 1:
+            st.error("⚠️ Customer is likely to CHURN")
+        else:
+            st.success("✅ Customer is likely to STAY")
+
+    with col7:
+        st.metric(label="Churn Probability", value=f"{prob:.2%}")
+
+    # Progress bar
+    st.progress(int(prob * 100))
+
+# --- Footer ---
+st.markdown("---")
+st.markdown("Built with ❤️ using Streamlit | ML Project")
