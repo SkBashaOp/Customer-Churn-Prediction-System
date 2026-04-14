@@ -1,0 +1,9 @@
+sudo apt update && sudo apt install -y python3-pip python3-venv python3-ipykernel jupyter
+sudo apt update && sudo apt install -y python3-pip python3-venv
+python3 -m pip install jupyter --user
+If needed, temporarily set:
+sudo resolvectl dns eth0 8.8.8.8 1.1.1.1
+(replace eth0 with your interface: check using ip a)
+sudo resolvectl dns wlp6s0 8.8.8.8 1.1.1.1
+resolvectl status
+pip install pandas numpy scikit-learn xgboost seaborn matplotlit
