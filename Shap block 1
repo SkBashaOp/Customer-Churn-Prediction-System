@@ -1,0 +1,76 @@
+# =========================
+# 📊 SHAP EXPLANATION (FINAL PRO VERSION)
+# =========================
+
+st.subheader("📊 SHAP Explanation")
+
+try:
+    # Transform input
+    X_input = model.named_steps['prep'].transform(input_df)
+    feature_names = model.named_steps['prep'].get_feature_names_out()
+
+    X_input_df = pd.DataFrame(X_input, columns=feature_names)
+
+    # 🔥 LOAD REAL BACKGROUND DATA (IMPORTANT)
+    # Load small sample from dataset
+    data = pd.read_csv("Telco-Customer-Churn.csv")
+
+    # Same preprocessing as training
+    data = data.drop("customerID", axis=1)
+    data['TotalCharges'] = data['TotalCharges'].replace(" ", "0")
+    data['TotalCharges'] = pd.to_numeric(data['TotalCharges'], errors='coerce')
+    data['TotalCharges'].fillna(0, inplace=True)
+    data['Churn'] = data['Churn'].map({'Yes':1,'No':0})
+
+    X_bg = data.drop("Churn", axis=1).sample(100, random_state=42)
+
+    X_bg_transformed = model.named_steps['prep'].transform(X_bg)
+    X_bg_df = pd.DataFrame(X_bg_transformed, columns=feature_names)
+
+    # 🔥 SHAP EXPLAINER
+    explainer = shap.LinearExplainer(
+        model.named_steps['model'],
+        X_bg_df
+    )
+
+    shap_values = explainer(X_input_df)
+
+    # -------------------------
+    # 🔍 1. WATERFALL
+    # -------------------------
+    st.markdown("### 🔍 Individual Explanation")
+
+    fig1, ax1 = plt.subplots()
+    shap.plots.waterfall(shap_values[0], show=False)
+    st.pyplot(fig1)
+
+    # -------------------------
+    # 📋 2. FEATURE TABLE
+    # -------------------------
+    st.markdown("### 📋 Feature Contribution Table")
+
+    contrib_df = pd.DataFrame({
+        "Feature": feature_names,
+        "SHAP Value": shap_values.values[0]
+    })
+
+    # Remove near-zero values
+    contrib_df = contrib_df[abs(contrib_df["SHAP Value"]) > 1e-4]
+
+    contrib_df = contrib_df.sort_values(by="SHAP Value", key=abs, ascending=False)
+
+    st.dataframe(contrib_df.head(15))
+
+    # -------------------------
+    # 🌍 3. GLOBAL SUMMARY
+    # -------------------------
+    st.markdown("### 🌍 Global Feature Importance")
+
+    shap_values_bg = explainer(X_bg_df)
+
+    fig2, ax2 = plt.subplots()
+    shap.summary_plot(shap_values_bg, X_bg_df, show=False)
+    st.pyplot(fig2)
+
+except Exception as e:
+    st.warning(f"SHAP error: {str(e)}")
